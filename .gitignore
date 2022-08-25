@@ -1,0 +1,19 @@
+# Rust artifacts
+target/
+
+log/
+
+# Visual Studio Code
+.vscode/
+.run/
+
+# JetBrains IDEs
+.idea/
+.run/
+
+# Editor backup files
+*~
+
+# macOS
+.DS_Store
+
