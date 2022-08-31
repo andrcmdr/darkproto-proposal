@@ -1,0 +1,30 @@
+[package]
+name = "darkproto-proposal"
+version = "0.1.0"
+authors = ["Darkblock <team@darkblock.io>"]
+edition = "2021"
+# rust-version = "1.63.0"
+description = "Threshold cryptosystem based decentralized secure protocol proposal."
+homepage = "https://github.com/darkblockio/darkproto-proposal"
+repository = "https://github.com/darkblockio/darkproto-proposal"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+# threshold_crypto = "0.4.0"
+threshold_crypto = { path = "../threshold-crypto" }
+
+tracing = "0.1.13"
+tracing-subscriber = "0.2.4"
+
+rand = "0.7.3"
+
+serde = { version = "1.0.104", features = ["derive"] }
+
+[dev-dependencies]
+
+[build-dependencies]
+
+[target]
+
+[features]
