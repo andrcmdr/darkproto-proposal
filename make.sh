@@ -54,7 +54,8 @@ elif [[ "$1" == "submodules" && "$2" == "" ]]; then
 
 elif [[ "$1" == "submodules" && "$2" == "update" ]]; then
 
-    git submodule update --recursive --init
+    git submodule sync;
+    git submodule update --recursive --init;
 
 elif [[ "$1" == "exec" ]]; then
 
