@@ -1,28 +1,28 @@
 [submodule "aes-primitives"]
 	path = aes-primitives
 	url = https://github.com/elalfer/rust-crypto-pimitives.git
-	branch = master
+	branch = f4696428b403a17bd1ff1fdff9c3a176e0dd4367
 [submodule "aes-benchmarks"]
 	path = aes-benchmarks
 	url = https://github.com/subspace/aes-benchmarks.git
-	branch = master
+	branch = 8efe95422cb2e96264aa434ad3ab4f31024d62f5
 [submodule "block-ciphers"]
 	path = block-ciphers
 	url = https://github.com/RustCrypto/block-ciphers.git
-	branch = master
+	branch = 3d20d9aa90390b5f7cfcc7007b2efda946a0ac4f
 [submodule "AEADs"]
 	path = AEADs
 	url = https://github.com/RustCrypto/AEADs.git
-	branch = master
+	branch = 5506a82739e22dbbc25a43512c0263c769e796c6
 [submodule "stream-ciphers"]
 	path = stream-ciphers
 	url = https://github.com/RustCrypto/stream-ciphers.git
-	branch = master
+	branch = 6b8b1098d24f56fe7373fd9931d90aa0b5845116
 [submodule "RSA"]
 	path = RSA
 	url = https://github.com/RustCrypto/RSA.git
-	branch = master
+	branch = d68e2731dcc0c9d4043281b2629fc3535523f9bf
 [submodule "elliptic-curves"]
 	path = elliptic-curves
 	url = https://github.com/RustCrypto/elliptic-curves.git
-	branch = master
+	branch = f40fe1cbebb3fbe3252f28160bc7d4bf8b580232
