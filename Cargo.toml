@@ -3,3 +3,12 @@ members = [
     "darkproto",
     "threshold-crypto",
 ]
+exclude = [
+    "aes-primitives",
+    "aes-benchmarks",
+    "block-ciphers",
+    "AEADs",
+    "stream-ciphers",
+    "RSA",
+    "elliptic-curves",
+]
