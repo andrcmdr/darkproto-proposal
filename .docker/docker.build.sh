@@ -7,9 +7,8 @@ shopt -s extquote
 
 set -f
 
-docker build -f ./enclave_base.dockerfile -t "enclave_base" ./
+docker build --no-cache -f ./enclave_base.dockerfile -t "enclave_base" ./
 
-DOCKER_BUILDKIT=1 docker build -f ./cipher_benchmarks.dockerfile -t "cipher_benchmarks" ./
+DOCKER_BUILDKIT=1 docker build --no-cache -f ./cipher_benchmarks.dockerfile -t "cipher_benchmarks" ./
 
-DOCKER_BUILDKIT=1 docker build -f ./darkproto_app.dockerfile -t "darkproto_app" ./
-
+DOCKER_BUILDKIT=1 docker build --no-cache -f ./darkproto_app.dockerfile -t "darkproto_app" ./
