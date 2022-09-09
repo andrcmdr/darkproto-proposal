@@ -9,7 +9,7 @@ use tracing:: {info, debug, error};
 use cli::{init_logging, Error};
 
 /// The asset (content) or content password for encryption
-use cat::PASCAL;
+use cat::GEORGE as G;
 
 pub mod cli;
 pub mod cat;
@@ -205,7 +205,7 @@ fn main() {
     // encrypt message, containing secret key for access to encrypted asset content file, using swarm's master public-key,
     // and send the ciphertext to each of the carrier actors/nodes in a swarm
 
-    let msg = PASCAL.as_bytes();
+    let msg = G.as_bytes();
     info!(target: "darkproto", "Plain text message: {}\n", String::from_utf8_lossy(msg));
 
     // Encrypt content file with service node shared secret (Node_SS), equal to content producer shared secret (CP_SS),
