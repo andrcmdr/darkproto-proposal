@@ -1,0 +1,21 @@
+#!/bin/bash
+#/usr/bin/env bash
+
+shopt -s extglob
+shopt -s extquote
+# shopt -s xpg_echo
+
+set -f
+
+docker run cipher_benchmarks && docker logs --follow cipher_benchmarks
+# docker run cipher_benchmarks && docker logs --follow cipher_benchmarks 2>&1 | tee -a ./cipher_benchmarks.log
+# docker run cipher_benchmarks && docker logs --follow cipher_benchmarks >> ./cipher_benchmarks.log 2>&1
+# docker run -ti cipher_benchmarks bash
+# docker exec -ti cipher_benchmarks bash
+
+docker run darkproto_app && docker logs --follow darkproto_app
+# docker run darkproto_app && docker logs --follow darkproto_app 2>&1 | tee -a ./darkproto_app.log
+# docker run darkproto_app && docker logs --follow darkproto_app >> ./darkproto_app.log 2>&1
+# docker run -ti darkproto_app bash
+# docker exec -ti darkproto_app bash
+
