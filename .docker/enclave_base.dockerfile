@@ -8,7 +8,10 @@ RUN yum upgrade -y
 RUN amazon-linux-extras enable epel
 RUN yum clean -y metadata && yum install -y epel-release
 RUN yum install -y cmake3 gcc git tar make
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain 1.63.0
+
+ENV CARGO_HOME="$HOME/rust" RUSTUP_HOME="$HOME/rustup" PATH="$PATH:$HOME/rust/bin"
+RUN curl -fsSL https://sh.rustup.rs | bash -is -- -y --verbose --no-modify-path --default-toolchain stable --profile minimal
+RUN rustup -v toolchain install nightly --profile minimal
 
 RUN yum install -y gcc-c++
 RUN yum install -y go
@@ -62,7 +65,7 @@ RUN cmake3 -DCMAKE_PREFIX_PATH=/usr -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_L
 RUN cmake3 --build json-c/build --target install
 
 RUN git clone -b v0.1.0 https://github.com/aws/aws-nitro-enclaves-nsm-api.git
-RUN source $HOME/.cargo/env && cd aws-nitro-enclaves-nsm-api && cargo build --release -p nsm-lib
+RUN cd aws-nitro-enclaves-nsm-api && cargo build --release -p nsm-lib
 RUN mv aws-nitro-enclaves-nsm-api/target/release/libnsm.so /usr/lib64
 RUN mv aws-nitro-enclaves-nsm-api/target/release/nsm.h /usr/include
 
