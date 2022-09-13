@@ -23,7 +23,7 @@ set -f
 
 git clone -b main https://github.com/andrcmdr/darkproto-proposal.git
 cd ./darkproto-proposal
-bash ./make.sh submodules update && bash ./make.sh submodules
+# bash ./make.sh submodules update && bash ./make.sh submodules
 cargo build --release
 mv -T ./target/x86_64-unknown-linux-gnu/release/darkproto-proposal /darkproto-app/darkproto-app
 EOT

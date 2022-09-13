@@ -22,10 +22,13 @@ shopt -s extquote
 set -f
 
 git clone -b main https://github.com/andrcmdr/darkproto-proposal.git
-cd ./darkproto-proposal
+cd /cipher-benchmarks/darkproto-proposal
 bash ./make.sh submodules update && bash ./make.sh submodules
-bash ./run.benchmarks.sh
+# bash ./run.benchmarks.sh
 EOT
 
-# COPY run.benchmarks.sh /cipher-benchmarks/darkproto-proposal/run.benchmarks.sh
-CMD cd ./darkproto-proposal && bash ./run.benchmarks.sh
+COPY --link build.benchmarks.sh /cipher-benchmarks/darkproto-proposal/build.benchmarks.sh
+RUN bash /cipher-benchmarks/darkproto-proposal/build.benchmarks.sh
+COPY --link run.benchmarks.sh /cipher-benchmarks/darkproto-proposal/run.benchmarks.sh
+# RUN bash /cipher-benchmarks/darkproto-proposal/run.benchmarks.sh
+CMD bash /cipher-benchmarks/darkproto-proposal/run.benchmarks.sh
