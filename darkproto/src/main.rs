@@ -176,14 +176,14 @@ fn main() {
     init_logging();
 
     // Waiting for `Enter` key press
-    let mut buffer = String::new();
-    let stdin = std::io::stdin();
-    info!(target: "darkproto", "Press `Enter` to continue:");
-    stdin.read_line(&mut buffer).expect("Failed to read input");
+    // let mut buffer = String::new();
+    // let stdin = std::io::stdin();
+    // info!(target: "darkproto", "Press `Enter` to continue:");
+    // stdin.read_line(&mut buffer).expect("Failed to read input");
 
     // Waiting 10 seconds in a main thread
-    // info!(target: "darkproto", "Waiting 10 seconds in a main thread...");
-    // std::thread::sleep(core::time::Duration::from_millis(1000));
+    info!(target: "darkproto", "Waiting 10 seconds in a main thread...");
+    std::thread::sleep(core::time::Duration::from_millis(10000));
 
     // Creates a Swarm with up to 3 actors and threshold equal to 2 actors.
     // Any message encrypted with the swarm master public-key (ciphertext, encrypted content secret)
@@ -307,4 +307,5 @@ fn main() {
     //  with immediate streaming to content consumer (and content decryption on consumer end);
     debug!(target: "darkproto", "Taking content file from distributed storage...\n");
     debug!(target: "darkproto", "Gradual re-encryptiion (decryptiion with content secret key and encryptiion with consumer secret key) of content file with streaming to consumer...\n");
+    info!(target: "darkproto", "Successfully finished!!!\n");
 }
