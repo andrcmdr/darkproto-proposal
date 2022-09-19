@@ -9,6 +9,6 @@ components = [ "clippy", "rls", "rust-analysis", "rust-analyzer-preview", "rustf
 # "rustc-docs" not included, 'cause conflicting with "rust-docs", by `rustc` docs path in "rust-docs" when installing
 # components = [ "cargo", "clippy", "llvm-tools-preview", "miri", "rls", "rust-analysis", "rust-analyzer-preview", "rust-docs", "rust-src", "rust-std", "rustc", "rustc-dev", "rustfmt" ]
 
-targets = ["x86_64-unknown-linux-gnu", "x86_64-fortanix-unknown-sgx"]
+targets = ["x86_64-unknown-linux-gnu", "x86_64-fortanix-unknown-sgx", "x86_64-unknown-linux-musl"]
 profile = "default"
 

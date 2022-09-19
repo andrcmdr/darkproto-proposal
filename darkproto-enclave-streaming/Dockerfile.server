@@ -1,0 +1,3 @@
+FROM alpine:latest
+COPY darkproto-enclave-streaming .
+CMD ["./darkproto-enclave-streaming", "server", "--port", "5005"]

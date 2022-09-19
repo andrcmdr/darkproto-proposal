@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "darkproto",
+    "darkproto-enclave-streaming",
     "threshold-crypto",
 ]
 exclude = [
