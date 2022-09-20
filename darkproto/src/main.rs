@@ -5,8 +5,8 @@ use threshold_crypto::{
 };
 
 /// For logging initialization
-use tracing:: {info, debug, error};
 use cli::{init_logging, Error};
+use tracing::{info, debug, error};
 
 /// The asset (content) or content password for encryption
 use cat::GEORGE as G;

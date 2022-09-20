@@ -1,10 +1,16 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 
-use darkproto_enclave_streaming::cli_parser::{ClientArgs, ServerArgs};
+/// For logging initialization
+use darkproto_enclave_streaming::cli::init_logging;
+
 use darkproto_enclave_streaming::create_app;
+use darkproto_enclave_streaming::cli_parser::{ClientArgs, ServerArgs};
 use darkproto_enclave_streaming::{client, server};
 
 fn main() {
+    // Initialize logging
+    init_logging();
+
     let app = create_app!();
     let args = app.get_matches();
 

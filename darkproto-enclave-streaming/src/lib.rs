@@ -71,12 +71,12 @@ fn vsock_connect(cid: u32, port: u32) -> Result<VsockSocket, String> {
     Err(err_msg)
 }
 
-/// Send 'Hello, world!' to the server
+/// Send message to the server
 pub fn client(args: ClientArgs) -> Result<(), String> {
     let vsocket = vsock_connect(args.cid, args.port)?;
     let fd = vsocket.as_raw_fd();
 
-    // TODO: Replace this with your client code
+    // TODO: Replace this with actual client code
     let data = "Hello, world!".to_string();
     let buf = data.as_bytes();
     let len: u64 = buf.len().try_into().map_err(|err| format!("{:?}", err))?;
@@ -106,7 +106,7 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
     loop {
         let fd = accept(socket_fd).map_err(|err| format!("Accept failed: {:?}", err))?;
 
-        // TODO: Replace this with your server code
+        // TODO: Replace this with actual server code
         let len = recv_u64(fd)?;
         let mut buf = [0u8; BUF_MAX_LEN];
         recv_loop(fd, &mut buf, len)?;
