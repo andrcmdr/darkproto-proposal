@@ -54,6 +54,14 @@ macro_rules! create_app {
             .about("DarkBlock's DarkProto streaming app with execution of sensitive encryption/decryption/re-encryption part inside the Intel SGX enclave (based on AWS Nitro Enclaves).")
             .setting(AppSettings::ArgRequiredElseHelp)
             .version(env!("CARGO_PKG_VERSION"))
+            .arg(
+                Arg::with_name("config")
+                .short('c')
+                .long("config")
+                .help("Configuration settings")
+                .takes_value(true)
+                .required(true),
+            )
             .subcommand(
                 SubCommand::with_name("server")
                     .about("Listen on a given port.")

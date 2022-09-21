@@ -1,6 +1,7 @@
-pub mod cli_parser;
-pub mod vsock;
 pub mod cli;
+pub mod cli_parser;
+pub mod config;
+pub mod vsock;
 
 use cli_parser::{ClientArgs, ServerArgs};
 use vsock::{recv_loop, recv_u64, send_loop, send_u64};
