@@ -8,7 +8,7 @@ pub struct ServerArgs {
 impl ServerArgs {
     pub fn new_with(args: &ArgMatches) -> Result<Self, String> {
         Ok(ServerArgs {
-            port: parse_port(args)?,
+            port: parse_arg("port", args)?,
         })
     }
 }
@@ -22,22 +22,33 @@ pub struct ClientArgs {
 impl ClientArgs {
     pub fn new_with(args: &ArgMatches) -> Result<Self, String> {
         Ok(ClientArgs {
-            cid: parse_cid_client(args)?,
-            port: parse_port(args)?,
+            cid: parse_arg("cid", args)?,
+            port: parse_arg("port", args)?,
         })
     }
 }
 
-fn parse_cid_client(args: &ArgMatches) -> Result<u32, String> {
-    let cid = args.value_of("cid").ok_or("Could not find cid argument")?;
-    cid.parse()
-        .map_err(|_err| "cid is not a number".to_string())
+#[derive(Debug, Clone)]
+pub struct RxTxArgs {
+    pub rx_port: u32,
+    pub tx_port: u32,
+    pub cid: u32,
 }
 
-fn parse_port(args: &ArgMatches) -> Result<u32, String> {
-    let port = args
-        .value_of("port")
-        .ok_or("Could not find port argument")?;
-    port.parse()
-        .map_err(|_err| "port is not a number".to_string())
+impl RxTxArgs {
+    pub fn new_with(args: &ArgMatches) -> Result<Self, String> {
+        Ok(RxTxArgs {
+            rx_port: parse_arg("rx-port", args)?,
+            tx_port: parse_arg("tx-port", args)?,
+            cid: parse_arg("cid", args)?,
+        })
+    }
+}
+
+fn parse_arg(flag: &str, args: &ArgMatches) -> Result<u32, String> {
+    let arg = args
+        .get_one::<String>(flag)
+        .ok_or(format!("Could not find --{:?} argument", flag))?;
+    arg.parse()
+        .map_err(|_err| format!("--{:?} is not a number", flag))
 }
