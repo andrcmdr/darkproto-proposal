@@ -64,32 +64,82 @@ macro_rules! create_app {
             )
             .subcommand(
                 SubCommand::with_name("server")
-                    .about("Listen on a given port.")
+                    .about("Listen on a given port number.")
                     .arg(
                         Arg::with_name("port")
                             .long("port")
-                            .help("port")
+                            .help("receiving port number")
                             .takes_value(true)
                             .required(true),
                     ),
             )
             .subcommand(
                 SubCommand::with_name("client")
-                    .about("Connect to a given cid and port.")
+                    .about("Connect to a given CID and port number.")
+                    .arg(
+                        Arg::with_name("cid")
+                            .long("cid")
+                            .help("Context Identifier (CID)")
+                            .takes_value(true)
+                            .required(true),
+                    )
                     .arg(
                         Arg::with_name("port")
                             .long("port")
-                            .help("port")
+                            .help("transmitting port number")
+                            .takes_value(true)
+                            .required(true),
+                    ),
+            )
+            .subcommand(
+                SubCommand::with_name("enclave-mode")
+                    .about("Enclave mode: listen on a given port, receive data (from host), then connect to a given CID and port and stream data (to host).")
+                    .arg(
+                        Arg::with_name("rx-port")
+                            .long("rx-port")
+                            .help("receiving port number")
+                            .takes_value(true)
+                            .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("tx-port")
+                            .long("tx-port")
+                            .help("transmitting port number")
                             .takes_value(true)
                             .required(true),
                     )
                     .arg(
                         Arg::with_name("cid")
                             .long("cid")
-                            .help("cid")
+                            .help("Context Identifier (CID)")
                             .takes_value(true)
                             .required(true),
                     ),
             )
-    };
+            .subcommand(
+                SubCommand::with_name("host-mode")
+                    .about("Host mode: connect to a given CID and port, stream data (to the enclave), and listen on a given port to receive data (from inside the enclave).")
+                    .arg(
+                        Arg::with_name("cid")
+                            .long("cid")
+                            .help("Context Identifier (CID)")
+                            .takes_value(true)
+                            .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("tx-port")
+                            .long("tx-port")
+                            .help("transmitting port number")
+                            .takes_value(true)
+                            .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("rx-port")
+                            .long("rx-port")
+                            .help("receiving port number")
+                            .takes_value(true)
+                            .required(true),
+                    ),
+            )
+        };
 }

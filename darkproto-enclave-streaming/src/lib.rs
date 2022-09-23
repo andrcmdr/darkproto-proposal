@@ -3,7 +3,8 @@ pub mod cli_parser;
 pub mod config;
 pub mod vsock;
 
-use cli_parser::{ClientArgs, ServerArgs};
+use cli_parser::{ServerArgs, ClientArgs, RxTxArgs};
+use config::AppConfig;
 use vsock::{recv_loop, recv_u64, send_loop, send_u64};
 
 use nix::sys::socket::listen as listen_vsock;
@@ -45,7 +46,10 @@ impl AsRawFd for VsockSocket {
     }
 }
 
-/// Initiate a connection on an AF_VSOCK socket
+/// Initiate a connection on an AF_VSOCK socket.
+/// VSOCK Address:
+/// The address for AF_VSOCK socket is defined as a combination of a
+/// 32-bit Context Identifier (CID) and a 32-bit port number.
 fn vsock_connect(cid: u32, port: u32) -> Result<VsockSocket, String> {
     let sockaddr = SockAddr::new_vsock(cid, port);
     let mut err_msg = String::new();
@@ -117,4 +121,12 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
                 .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?
         );
     }
+}
+
+pub fn rxtx(args: RxTxArgs, config: AppConfig) -> Result<(), String> {
+    todo!("{:?}\n{:?}\n", args, config)
+}
+
+pub fn txrx(args: RxTxArgs, config: AppConfig) -> Result<(), String> {
+    todo!("{:?}\n{:?}\n", args, config)
 }
