@@ -1,4 +1,11 @@
 #!/bin/bash
+##!/usr/bin/env bash
+
+shopt -s extglob
+shopt -s extquote
+# shopt -s xpg_echo
+
+set -f
 
 # Specify the desired volume size in GiB as a command line argument. If not specified, default to 50 GiB.
 SIZE=${1:-50}
