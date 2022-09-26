@@ -1,0 +1,6 @@
+in_file = "./.dl/bbb_sunflower_native_60fps_stereo_abl.mp4"
+out_file = "./.dl/bbb_sunflower_native_60fps_stereo_abl.mp4.encrypted"
+init_enc_pwd_file = "./.vault/pwd"
+re_enc_pwd_file = "./.vault/re_enc_pwd"
+init_random_seed_file = "./.vault/seed"
+re_enc_random_seed_file = "./.vault/re_enc_seed"
