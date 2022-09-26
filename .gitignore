@@ -2,6 +2,8 @@
 target/
 
 log/
+*pwd
+*seed
 
 # Visual Studio Code
 .vscode/
