@@ -139,6 +139,13 @@ macro_rules! create_app {
                             .help("receiving port number")
                             .takes_value(true)
                             .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("re-enc")
+                        .long("re-enc")
+                        .help("Make re-encryption with re-encryption key from `config.toml` file")
+                        .takes_value(false)
+                        .required(false),
                     ),
             )
         };

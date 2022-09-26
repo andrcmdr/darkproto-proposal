@@ -6,6 +6,7 @@ use std::convert::TryInto;
 use std::mem::size_of;
 use std::os::unix::io::RawFd;
 
+/// Send the transferring data length in u64 though vsocket
 pub fn send_u64(fd: RawFd, val: u64) -> Result<(), String> {
     let mut buf = [0u8; size_of::<u64>()];
     LittleEndian::write_u64(&mut buf, val);
@@ -13,6 +14,7 @@ pub fn send_u64(fd: RawFd, val: u64) -> Result<(), String> {
     Ok(())
 }
 
+/// Take the receiving data length in u64 from vsocket
 pub fn recv_u64(fd: RawFd) -> Result<u64, String> {
     let mut buf = [0u8; size_of::<u64>()];
     recv_loop(fd, &mut buf, size_of::<u64>().try_into().unwrap())?;
@@ -20,7 +22,7 @@ pub fn recv_u64(fd: RawFd) -> Result<u64, String> {
     Ok(val)
 }
 
-/// Send `len` bytes from `buf` to a connection-oriented socket
+/// Send exact data length in bytes from  buffer to a connection-oriented vsocket
 pub fn send_loop(fd: RawFd, buf: &[u8], len: u64) -> Result<(), String> {
     let len: usize = len.try_into().map_err(|err| format!("{:?}", err))?;
     let mut send_bytes = 0;
@@ -37,7 +39,7 @@ pub fn send_loop(fd: RawFd, buf: &[u8], len: u64) -> Result<(), String> {
     Ok(())
 }
 
-/// Receive `len` bytes from a connection-orriented socket
+/// Receive exact data length in bytes to buffer from a connection-orriented vsocket
 pub fn recv_loop(fd: RawFd, buf: &mut [u8], len: u64) -> Result<(), String> {
     let len: usize = len.try_into().map_err(|err| format!("{:?}", err))?;
     let mut recv_bytes = 0;

@@ -15,11 +15,11 @@ use std::convert::TryInto;
 use std::os::unix::io::{AsRawFd, RawFd};
 
 const VMADDR_CID_ANY: u32 = 0xFFFFFFFF;
+/// 32 or 64 KiB buffer size (depending on 32 or 64 bit architecture is used)
 const BUF_MAX_LEN: usize = 8192;
-// Maximum number of outstanding connections in the socket's
-// listen queue
+/// Maximum number of outstanding connections in the socket's listen queue
 const BACKLOG: usize = 128;
-// Maximum number of connection attempts
+/// Maximum number of connection attempts
 const MAX_CONNECTION_ATTEMPTS: usize = 5;
 
 struct VsockSocket {
@@ -91,8 +91,7 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     Ok(())
 }
 
-/// Accept connections on a certain port and print
-/// the received data
+/// Accept connections on a certain port and print the received data
 pub fn server(args: ServerArgs) -> Result<(), String> {
     let socket_fd = socket(
         AddressFamily::Vsock,
@@ -123,10 +122,17 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
     }
 }
 
+/// Enclave mode handler:
+/// listen on a given port, receive data (from host),
+/// then connect to a given CID and port and stream data (to host) from inside the enclave.
 pub fn rxtx(args: RxTxArgs, config: AppConfig) -> Result<(), String> {
     todo!("{:?}\n{:?}\n", args, config)
 }
 
+/// Host mode handler:
+/// connect to a given CID and port, stream data (to the enclave),
+/// and listen on a given port to receive data (from inside the enclave),
+/// then dump received data to persistent storage.
 pub fn txrx(args: RxTxArgs, config: AppConfig) -> Result<(), String> {
     todo!("{:?}\n{:?}\n", args, config)
 }
