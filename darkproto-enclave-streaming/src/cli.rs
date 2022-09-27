@@ -8,7 +8,7 @@ pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 pub fn init_logging() {
     // Filters can be customized through RUST_LOG environment variable via CLI
     let mut env_filter = EnvFilter::new(
-        "darkproto=info,darkproto_run_time=info",
+        "darkproto=info,darkproto_runtime=info",
     );
 
     if let Ok(rust_log) = std::env::var("RUST_LOG") {
@@ -40,7 +40,7 @@ impl<T, E: std::fmt::Debug> ExitGracefully<T, E> for Result<T, E> {
         match self {
             Ok(val) => val,
             Err(err) => {
-                error!("{:?}: {}", err, message);
+                error!(target: "darkproto_runtime", "{:?}: {}", err, message);
                 std::process::exit(1);
             }
         }
@@ -114,7 +114,22 @@ macro_rules! create_app {
                             .help("Context Identifier (CID)")
                             .takes_value(true)
                             .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("cipher")
+                        .long("cipher")
+                        .help("Set cipher/cryptosystem for encryption/re-encryption [ chacha20 | xchacha20 | aes256-ctr | aes256-ofb | aes256-cfb | aes256-cfb8 | BLS-threshold | BLS-DKG-threshold-transform ]")
+                        .takes_value(true)
+                        .required(false),
+                    )
+                    .arg(
+                        Arg::with_name("re-enc")
+                        .long("re-enc")
+                        .help("Make re-encryption with re-encryption key from `config.toml` file")
+                        .takes_value(false)
+                        .required(false),
                     ),
+
             )
             .subcommand(
                 SubCommand::with_name("host-mode")
