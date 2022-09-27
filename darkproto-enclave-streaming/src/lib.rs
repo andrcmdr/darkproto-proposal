@@ -3,6 +3,8 @@ pub mod cli_parser;
 pub mod config;
 pub mod vsock;
 
+use tracing::debug;
+
 use cli_parser::{ServerArgs, ClientArgs, RxTxArgs};
 use config::AppConfig;
 use vsock::{recv_loop, recv_u64, send_loop, send_u64};
@@ -76,7 +78,8 @@ fn vsock_connect(cid: u32, port: u32) -> Result<VsockSocket, String> {
     Err(err_msg)
 }
 
-/// Send message to the server
+/// Send data in a message to the server (enclave):
+/// i.e. connect to a given CID and port, stream data (to the enclave).
 pub fn client(args: ClientArgs) -> Result<(), String> {
     let vsocket = vsock_connect(args.cid, args.port)?;
     let fd = vsocket.as_raw_fd();
@@ -91,7 +94,9 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     Ok(())
 }
 
-/// Accept connections on a certain port and print the received data
+/// Accept connections on a certain port and receive data in a message from client (sender from inside the enclave):
+/// i.e. listen on a given port to receive data (from inside the enclave),
+/// then dump received data to persistent storage.
 pub fn server(args: ServerArgs) -> Result<(), String> {
     let socket_fd = socket(
         AddressFamily::Vsock,
@@ -125,8 +130,39 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
 /// Enclave mode handler:
 /// listen on a given port, receive data (from host),
 /// then connect to a given CID and port and stream data (to host) from inside the enclave.
-pub fn rxtx(args: RxTxArgs, config: AppConfig) -> Result<(), String> {
-    todo!("{:?}\n{:?}\n", args, config)
+pub fn rxtx(args: RxTxArgs, _config: AppConfig) -> Result<(), String> {
+    let rx_socket_fd = socket(
+        AddressFamily::Vsock,
+        SockType::Stream,
+        SockFlag::empty(),
+        None,
+    )
+    .map_err(|err| format!("Create rx socket failed: {:?}", err))?;
+
+    let rx_sockaddr = SockAddr::new_vsock(VMADDR_CID_ANY, args.rx_port);
+
+    bind(rx_socket_fd, &rx_sockaddr).map_err(|err| format!("Bind failed: {:?}", err))?;
+
+    listen_vsock(rx_socket_fd, BACKLOG).map_err(|err| format!("Listen failed: {:?}", err))?;
+
+    let tx_vsocket = vsock_connect(args.cid, args.tx_port)?;
+    let tx_fd = tx_vsocket.as_raw_fd();
+
+    loop {
+        let rx_fd = accept(rx_socket_fd).map_err(|err| format!("Accept failed: {:?}", err))?;
+
+        let rx_len = recv_u64(rx_fd)?;
+        let mut buf = [0u8; BUF_MAX_LEN];
+        recv_loop(rx_fd, &mut buf, rx_len)?;
+        debug!(target: "darkproto", "{:?} bytes long data was received", rx_len);
+
+        // encrypt buffer
+
+        let tx_len: u64 = buf.len().try_into().map_err(|err| format!("{:?}", err))?;
+        send_u64(tx_fd, tx_len)?;
+        send_loop(tx_fd, &buf, tx_len)?;
+        debug!(target: "darkproto", "{:?} bytes long data was transmitted", rx_len);
+    }
 }
 
 /// Host mode handler:
