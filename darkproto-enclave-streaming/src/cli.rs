@@ -16,7 +16,8 @@ pub fn init_logging() {
             for directive in rust_log.split(',').filter_map(|s| match s.parse() {
                 Ok(directive) => Some(directive),
                 Err(err) => {
-                    eprintln!("Ignoring directive `{}`: {}", s, err);
+                    error!(target: "darkproto_runtime", "`{}` is not a valid directive. Ignoring directive `{}`. Failed while parsing a directive `{}` with error: {:?}", s, s, s, err);
+                    eprintln!("`{}` is not a valid directive. Ignoring directive `{}`. Failed while parsing a directive `{}` with error: {:?}", s, s, s, err);
                     None
                 }
             }) {

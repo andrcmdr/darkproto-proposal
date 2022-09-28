@@ -1,3 +1,4 @@
+use tracing::error;
 use byteorder::{ByteOrder, LittleEndian};
 use nix::errno::Errno::EINTR;
 use nix::sys::socket::MsgFlags;
@@ -24,14 +25,23 @@ pub fn recv_u64(fd: RawFd) -> Result<u64, String> {
 
 /// Send exact data length in bytes from  buffer to a connection-oriented vsocket
 pub fn send_loop(fd: RawFd, buf: &[u8], len: u64) -> Result<(), String> {
-    let len: usize = len.try_into().map_err(|err| format!("{:?}", err))?;
+    let len: usize = len.try_into().map_err(|err| {
+        error!(target: "darkproto", "{:?}", err);
+        format!("{:?}", err)
+    })?;
     let mut send_bytes = 0;
 
     while send_bytes < len {
         let size = match send(fd, &buf[send_bytes..len], MsgFlags::empty()) {
             Ok(size) => size,
-            Err(nix::Error::Sys(EINTR)) => 0,
-            Err(err) => return Err(format!("{:?}", err)),
+            Err(nix::Error::Sys(EINTR)) => {
+                error!(target: "darkproto", "EINTR error");
+                0
+            },
+            Err(err) => {
+                error!(target: "darkproto", "{:?}", err);
+                return Err(format!("{:?}", err))
+            },
         };
         send_bytes += size;
     }
@@ -41,14 +51,23 @@ pub fn send_loop(fd: RawFd, buf: &[u8], len: u64) -> Result<(), String> {
 
 /// Receive exact data length in bytes to buffer from a connection-orriented vsocket
 pub fn recv_loop(fd: RawFd, buf: &mut [u8], len: u64) -> Result<(), String> {
-    let len: usize = len.try_into().map_err(|err| format!("{:?}", err))?;
+    let len: usize = len.try_into().map_err(|err| {
+        error!(target: "darkproto", "{:?}", err);
+        format!("{:?}", err)
+}   )?;
     let mut recv_bytes = 0;
 
     while recv_bytes < len {
         let size = match recv(fd, &mut buf[recv_bytes..len], MsgFlags::empty()) {
             Ok(size) => size,
-            Err(nix::Error::Sys(EINTR)) => 0,
-            Err(err) => return Err(format!("{:?}", err)),
+            Err(nix::Error::Sys(EINTR)) => {
+                error!(target: "darkproto", "EINTR error");
+                0
+            },
+            Err(err) => {
+                error!(target: "darkproto", "{:?}", err);
+                return Err(format!("{:?}", err))
+            },
         };
         recv_bytes += size;
     }

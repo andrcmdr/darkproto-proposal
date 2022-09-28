@@ -3,7 +3,7 @@ pub mod cli_parser;
 pub mod config;
 pub mod vsock;
 
-use tracing::debug;
+use tracing::{debug, error};
 
 use cli_parser::{ServerArgs, ClientArgs, RxTxArgs};
 use config::AppConfig;
@@ -22,7 +22,7 @@ const BUF_MAX_LEN: usize = 8192;
 /// Maximum number of outstanding connections in the socket's listen queue
 const BACKLOG: usize = 128;
 /// Maximum number of connection attempts
-const MAX_CONNECTION_ATTEMPTS: usize = 5;
+const MAX_CONNECTION_ATTEMPTS: usize = 10;
 
 struct VsockSocket {
     socket_fd: RawFd,
@@ -37,8 +37,8 @@ impl VsockSocket {
 impl Drop for VsockSocket {
     fn drop(&mut self) {
         shutdown(self.socket_fd, Shutdown::Both)
-            .unwrap_or_else(|e| eprintln!("Failed to shut socket down: {:?}", e));
-        close(self.socket_fd).unwrap_or_else(|e| eprintln!("Failed to close socket: {:?}", e));
+            .unwrap_or_else(|err| error!(target: "darkproto", "Failed to shut socket down: {:?}", err));
+        close(self.socket_fd).unwrap_or_else(|err| error!(target: "darkproto", "Failed to close socket: {:?}", err));
     }
 }
 
@@ -64,11 +64,17 @@ fn vsock_connect(cid: u32, port: u32) -> Result<VsockSocket, String> {
                 SockFlag::empty(),
                 None,
             )
-            .map_err(|err| format!("Failed to create the socket: {:?}", err))?,
+            .map_err(|err| {
+                error!(target: "darkproto", "Failed to create socket: {:?}", err);
+                format!("Failed to create socket: {:?}", err)
+            })?,
         );
         match connect(vsocket.as_raw_fd(), &sockaddr) {
             Ok(_) => return Ok(vsocket),
-            Err(e) => err_msg = format!("Failed to connect: {}", e),
+            Err(e) => {
+                error!(target: "darkproto", "Failed to connect: {:?}", e);
+                err_msg = format!("Failed to connect: {:?}", e)
+            },
         }
 
         // Exponentially backoff before retrying to connect to the socket
@@ -87,7 +93,10 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     // TODO: Replace this with actual client code
     let data = "Hello, world!".to_string();
     let buf = data.as_bytes();
-    let len: u64 = buf.len().try_into().map_err(|err| format!("{:?}", err))?;
+    let len: u64 = buf.len().try_into().map_err(|err| {
+        error!(target: "darkproto", "{:?}", err);
+        format!("{:?}", err)
+    })?;
     send_u64(fd, len)?;
     send_loop(fd, buf, len)?;
 
@@ -104,16 +113,28 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
         SockFlag::empty(),
         None,
     )
-    .map_err(|err| format!("Create socket failed: {:?}", err))?;
+    .map_err(|err| {
+        error!(target: "darkproto", "Create socket failed: {:?}", err);
+        format!("Create socket failed: {:?}", err)
+    })?;
 
     let sockaddr = SockAddr::new_vsock(VMADDR_CID_ANY, args.port);
 
-    bind(socket_fd, &sockaddr).map_err(|err| format!("Bind failed: {:?}", err))?;
+    bind(socket_fd, &sockaddr).map_err(|err| {
+        error!(target: "darkproto", "Bind failed: {:?}", err);
+        format!("Bind failed: {:?}", err)
+    })?;
 
-    listen_vsock(socket_fd, BACKLOG).map_err(|err| format!("Listen failed: {:?}", err))?;
+    listen_vsock(socket_fd, BACKLOG).map_err(|err| {
+        error!(target: "darkproto", "Listen failed: {:?}", err);
+        format!("Listen failed: {:?}", err)
+    })?;
 
     loop {
-        let fd = accept(socket_fd).map_err(|err| format!("Accept failed: {:?}", err))?;
+        let fd = accept(socket_fd).map_err(|err| {
+            error!(target: "darkproto", "Accept failed: {:?}", err);
+            format!("Accept failed: {:?}", err)
+        })?;
 
         // TODO: Replace this with actual server code
         let len = recv_u64(fd)?;
@@ -122,7 +143,10 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
         println!(
             "{}",
             String::from_utf8(buf.to_vec())
-                .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?
+                .map_err(|err| {
+                    error!(target: "darkproto", "The received bytes are not UTF-8: {:?}", err);
+                    format!("The received bytes are not UTF-8: {:?}", err)
+                })?
         );
     }
 }
@@ -137,31 +161,49 @@ pub fn rxtx(args: RxTxArgs, _config: AppConfig) -> Result<(), String> {
         SockFlag::empty(),
         None,
     )
-    .map_err(|err| format!("Create rx socket failed: {:?}", err))?;
+    .map_err(|err| {
+        error!(target: "darkproto", "Create rx socket failed: {:?}", err);
+        format!("Create rx socket failed: {:?}", err)
+    })?;
 
     let rx_sockaddr = SockAddr::new_vsock(VMADDR_CID_ANY, args.rx_port);
 
-    bind(rx_socket_fd, &rx_sockaddr).map_err(|err| format!("Bind failed: {:?}", err))?;
+    bind(rx_socket_fd, &rx_sockaddr).map_err(|err| {
+        error!(target: "darkproto", "Bind failed: {:?}", err);
+        format!("Bind failed: {:?}", err)
+    })?;
 
-    listen_vsock(rx_socket_fd, BACKLOG).map_err(|err| format!("Listen failed: {:?}", err))?;
+    listen_vsock(rx_socket_fd, BACKLOG).map_err(|err| {
+        error!(target: "darkproto", "Listen failed: {:?}", err);
+        format!("Listen failed: {:?}", err)
+    })?;
 
     let tx_vsocket = vsock_connect(args.cid, args.tx_port)?;
     let tx_fd = tx_vsocket.as_raw_fd();
 
+    let (mut rx_block_num, mut tx_block_num) = (0_usize, 0_usize);
     loop {
-        let rx_fd = accept(rx_socket_fd).map_err(|err| format!("Accept failed: {:?}", err))?;
+        let rx_fd = accept(rx_socket_fd).map_err(|err| {
+            error!(target: "darkproto", "Accept failed: {:?}", err);
+            format!("Accept failed: {:?}", err)
+        })?;
 
         let rx_len = recv_u64(rx_fd)?;
         let mut buf = [0u8; BUF_MAX_LEN];
         recv_loop(rx_fd, &mut buf, rx_len)?;
-        debug!(target: "darkproto", "{:?} bytes long data was received", rx_len);
+        rx_block_num+=1;
+        debug!(target: "darkproto", "{:?} bytes long data was received in data block #{:?}", rx_len, rx_block_num);
 
-        // encrypt buffer
+        // TODO: buffer encryption
 
-        let tx_len: u64 = buf.len().try_into().map_err(|err| format!("{:?}", err))?;
+        let tx_len: u64 = buf.len().try_into().map_err(|err| {
+            error!(target: "darkproto", "{:?}", err);
+            format!("{:?}", err)
+        })?;
         send_u64(tx_fd, tx_len)?;
         send_loop(tx_fd, &buf, tx_len)?;
-        debug!(target: "darkproto", "{:?} bytes long data was transmitted", rx_len);
+        tx_block_num+=1;
+        debug!(target: "darkproto", "{:?} bytes long data was transmitted in data block #{:?}", tx_len, tx_block_num);
     }
 }
 
