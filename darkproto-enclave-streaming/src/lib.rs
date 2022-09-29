@@ -3,6 +3,8 @@ pub mod cli_parser;
 pub mod config;
 pub mod vsock;
 
+use serde::{Deserialize, Serialize};
+
 use tracing::{debug, error};
 
 use cli_parser::{ServerArgs, ClientArgs, RxTxArgs};
@@ -16,6 +18,8 @@ use nix::unistd::close;
 use std::convert::TryInto;
 use std::os::unix::io::{AsRawFd, RawFd};
 
+use std::io::Read;
+
 const VMADDR_CID_ANY: u32 = 0xFFFFFFFF;
 /// 32 or 64 KiB buffer size (depending on 32 or 64 bit architecture is used)
 const BUF_MAX_LEN: usize = 8192;
@@ -24,7 +28,7 @@ const BACKLOG: usize = 128;
 /// Maximum number of connection attempts
 const MAX_CONNECTION_ATTEMPTS: usize = 10;
 
-struct VsockSocket {
+pub struct VsockSocket {
     socket_fd: RawFd,
 }
 
@@ -48,11 +52,66 @@ impl AsRawFd for VsockSocket {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct ChunkSource<T> where T: Read {
+    source: T,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Chunk {
+    data: Vec<u8>,
+    hash: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChunkEncrypted {
+    data: Vec<u8>,
+    hash_plaintext: String,
+    hash_ciphertext: String,
+}
+
+impl<T> Iterator for ChunkSource<T> where T: Read {
+    type Item = Chunk;
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut buffer  = [0; 1024*1024];
+        let read_bytes_len = self.source.read(&mut buffer[..])
+            .unwrap_or_else(|err| {
+                error!(target: "darkproto", "Error while reading the bytes chunk of data from the source: {:?}", err);
+                0_usize
+            });
+        Some(produce_chunk(&buffer[..read_bytes_len]))
+    }
+}
+
+pub fn produce_chunk(in_data: &[u8]) -> Chunk {
+    Chunk { 
+        data: in_data.to_vec(),
+        hash: hash_data(in_data),
+    }
+}
+
+pub fn produce_encrypted_chunk(in_data: &Chunk) -> ChunkEncrypted {
+    let encrypted_data = encrypt_data(in_data.data.as_slice());
+    ChunkEncrypted { 
+        data: encrypted_data.clone(),
+        hash_plaintext: in_data.hash.clone(),
+        hash_ciphertext: hash_data(encrypted_data.as_slice()),
+    }
+}
+
+pub fn hash_data(in_data: &[u8]) -> String {
+    todo!("{:?}", in_data)
+}
+
+pub fn encrypt_data(in_data: &[u8]) -> Vec<u8> {
+    todo!("{:?}", in_data)
+}
+
 /// Initiate a connection on an AF_VSOCK socket.
 /// VSOCK Address:
 /// The address for AF_VSOCK socket is defined as a combination of a
 /// 32-bit Context Identifier (CID) and a 32-bit port number.
-fn vsock_connect(cid: u32, port: u32) -> Result<VsockSocket, String> {
+pub fn vsock_connect(cid: u32, port: u32) -> Result<VsockSocket, String> {
     let sockaddr = SockAddr::new_vsock(cid, port);
     let mut err_msg = String::new();
 
