@@ -20,6 +20,8 @@ use std::os::unix::io::{AsRawFd, RawFd};
 
 use std::io::Read;
 
+use blake2::{Blake2b512, Digest};
+
 const VMADDR_CID_ANY: u32 = 0xFFFFFFFF;
 /// 32 or 64 KiB buffer size (depending on 32 or 64 bit architecture is used)
 const BUF_MAX_LEN: usize = 8192;
@@ -100,7 +102,10 @@ pub fn produce_encrypted_chunk(in_data: &Chunk) -> ChunkEncrypted {
 }
 
 pub fn hash_data(in_data: &[u8]) -> String {
-    todo!("{:?}", in_data)
+    let mut hasher = Blake2b512::new();
+    hasher.update(in_data);
+    let hash = hasher.finalize();
+    format!("{:16x}", hash).trim().to_string()
 }
 
 pub fn encrypt_data(in_data: &[u8]) -> Vec<u8> {
